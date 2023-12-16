@@ -1,0 +1,28 @@
+{
+    "name": "seeder",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "start:dev": "pnpm run build && pnpm run start"
+    },
+    "keywords": [
+        "database seeder typescript typeorm"
+    ],
+    "author": "apac-coe",
+    "license": "UNLICENSED",
+    "devDependencies": {
+        "@types/lodash": "^4.14.197",
+        "@types/node": "^20.5.7",
+        "typescript": "^5.2.2"
+    },
+    "dependencies": {
+        "@faker-js/faker": "8.2.0",
+        "dayjs": "^1.11.9",
+        "lodash": "^4.17.21",
+        "mysql": "^2.18.1",
+        "typeorm": "^0.3.17"
+    }
+}
