@@ -41,7 +41,7 @@ def test_get_order_with_query_params(query_params):
     [
         {"buySell": "T"},
         {"date": "2023-13-03"},
-    ]
+    ],
 )
 def test_get_order_with_invalid_query_params(query_params):
     headers = {"Authorization": f"Bearer {SAMPLE_USER_TOKEN}"}

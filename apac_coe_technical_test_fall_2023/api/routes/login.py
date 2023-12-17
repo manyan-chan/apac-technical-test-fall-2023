@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from apac_coe_technical_test_fall_2023.jwt.auth import SAMPLE_USER_TOKEN, generate_token
+from apac_coe_technical_test_fall_2023.jwt.auth import generate_token, verify_token
 
 router = APIRouter()
 
@@ -15,7 +15,7 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> JSONRes
     token = generate_token(
         {"username": form_data.username, "password": form_data.password}
     )
-    if token == SAMPLE_USER_TOKEN:
+    if verify_token(token):
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={
