@@ -50,23 +50,6 @@ class GetOrderQueryParams:
             description="Number of results per page, default = 15",
         ),
     ):
-        # Date validation
-        if date is not None:
-            try:
-                dt.datetime.strptime(date, "%Y-%m-%d")
-            except ValueError:
-                raise ValueError(
-                    "Invalid value for date. Must be in YYYY-MM-DD format."
-                )
-
-        # buySell validation
-        if buySell is not None and buySell not in {"B", "S"}:
-            raise ValueError("Invalid value for buySell. Must be one of: B, S.")
-
-        # topLevel validation
-        if topLevel is not None and topLevel not in {"Y", "N"}:
-            raise ValueError("Invalid value for topLevel. Must be one of: Y, N.")
-
         self.date = date
         self.buySell = buySell
         self.topLevel = topLevel
@@ -74,6 +57,21 @@ class GetOrderQueryParams:
         self.counterparty = counterparty
         self.page = page
         self.limit = limit
+
+    def validate_date(self):
+        if self.date:
+            try:
+                dt.datetime.strptime(self.date, "%Y-%m-%d")
+            except ValueError:
+                raise ValueError("Invalid date format, should be YYYY-MM-DD")
+
+    def validate_buySell(self):
+        if self.buySell and self.buySell not in ["B", "S"]:
+            raise ValueError("Invalid buySell value, should be B or S")
+
+    def validate_topLevel(self):
+        if self.topLevel and self.topLevel not in ["Y", "N"]:
+            raise ValueError("Invalid topLevel value, should be Y or N")
 
 
 class GetOrderResponseModel(BaseModel):
@@ -99,17 +97,17 @@ def get_order(
 
         query = session.query(Orders)
 
-        if query_params.date:
+        if query_params.date and query_params.validate_date():
             date = dt.datetime.strptime(query_params.date, "%Y-%m-%d").date()
             query = query.filter(
                 Orders.Entered_Datetime >= date,
                 Orders.Entered_Datetime < date + dt.timedelta(days=1),
             )
 
-        if query_params.buySell:
+        if query_params.buySell and query_params.validate_buySell():
             query = query.filter(Orders.Buy_Sell == query_params.buySell)
 
-        if query_params.topLevel:
+        if query_params.topLevel and query_params.validate_topLevel():
             query = query.filter(Orders.Top_Level == query_params.topLevel)
 
         if query_params.ticker:

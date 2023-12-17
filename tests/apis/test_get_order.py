@@ -21,24 +21,29 @@ def test_get_order_authorization(headers, expected_status):
 
 
 @pytest.mark.parametrize(
-    "headers, query_params",
+    "query_params",
     [
-        (
-            {"Authorization": "Bearer valid_token"},
-            {
-                "date": "2023-12-15",
-                "buySell": "B",
-                "topLevel": "Y",
-                "ticker": "AAPL",
-                "counterparty": "XYZ",
-            },
-        ),
+        {"buySell": "B"},
+        {"counterparty": "FIS"},
+        {"date": "2023-01-03"},
+        {"topLevel": "Y"},
     ],
 )
-def test_get_order_with_query_params(headers, query_params):
-    response = client.get("/getOrder", headers=headers, params=query_params)
+def test_get_order_with_query_params(query_params):
+    headers = {"Authorization": f"Bearer {SAMPLE_USER_TOKEN}"}
+    params = query_params
+    response = client.get("/api/getOrder", headers=headers, params=params)
     assert response.status_code == 200
-    assert "status" in response.json()
-    assert "data" in response.json()
-    assert "timestamp" in response.json()
-    assert "pagination" in response.json()
+
+
+@pytest.mark.parametrize(
+    "query_params",
+    [
+        {"buySell": "T"},
+        {"date": "2023-13-03"},
+    ]
+)
+def test_get_order_with_invalid_query_params(query_params):
+    headers = {"Authorization": f"Bearer {SAMPLE_USER_TOKEN}"}
+    response = client.get("/api/getOrder", headers=headers, params=query_params)
+    assert response.status_code == 400

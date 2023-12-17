@@ -22,12 +22,10 @@ class GetTradeQueryParams:
         date: Optional[str] = Query(
             None,
             description="Search for Entered_Datetime in YYYY-MM-DD format",
-            regex=r"^\d{4}-\d{2}-\d{2}$",
         ),
         buySell: Optional[str] = Query(
             None,
             description="Search for Buy_Sell (B or S)",
-            regex=r"^[BS]$",
         ),
         ticker: Optional[str] = Query(
             None,
@@ -52,17 +50,6 @@ class GetTradeQueryParams:
             description="Number of results per page, default = 15",
         ),
     ):
-        # Date validation
-        if date is not None:
-            try:
-                dt.datetime.strptime(date, "%Y-%m-%d")
-            except ValueError:
-                raise ValueError("date must be in YYYY-MM-DD format")
-
-        # Buy/Sell validation
-        if buySell is not None and buySell not in {"B", "S"}:
-            raise ValueError("buySell must be either 'B' or 'S'")
-
         self.date = date
         self.buySell = buySell
         self.ticker = ticker
@@ -70,6 +57,18 @@ class GetTradeQueryParams:
         self.sedol = sedol
         self.page = page
         self.limit = limit
+        
+    def validate_date(self):
+        if self.date:
+            try:
+                dt.datetime.strptime(self.date, "%Y-%m-%d")
+            except ValueError:
+                raise ValueError("Invalid date format, should be YYYY-MM-DD")
+
+    def validate_buySell(self):
+        if self.buySell and self.buySell not in ["B", "S"]:
+            raise ValueError("Invalid buySell value, should be B or S")
+        
 
 
 
@@ -99,14 +98,14 @@ def get_trade(
         query = session.query(Trades)
 
         # Add filters to the query
-        if query_params.date:
+        if query_params.date and query_params.validate_date():
             date = dt.datetime.strptime(query_params.date, "%Y-%m-%d").date()
             query = query.filter(
                 Trades.Entered_Datetime >= date,
                 Trades.Entered_Datetime < date + dt.timedelta(days=1),
             )
 
-        if query_params.buySell:
+        if query_params.buySell and query_params.validate_buySell():
             query = query.filter(Trades.Buy_Sell == query_params.buySell)
 
         if query_params.ticker:
