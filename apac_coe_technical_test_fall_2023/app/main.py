@@ -1,19 +1,18 @@
 import dash
-import requests
-from dash import Input, Output, State, dcc, html
-from flask import Flask, session
-from flask_login import LoginManager, UserMixin, current_user, login_user
+from dash import Input, Output, callback, dcc, html
+from flask import Flask
+from flask_login import LoginManager, current_user
 
+from apac_coe_technical_test_fall_2023.app.user import User
 from apac_coe_technical_test_fall_2023.settings import SECRET_KEY
 
 # Exposing the Flask Server to enable configuring it for logging in
 server = Flask(__name__)
 app = dash.Dash(
     __name__,
-    server=True,
+    server=False,
     use_pages=True,
     suppress_callback_exceptions=True,
-    prevent_initial_callbacks=True,
 )
 app.init_app(server)
 
@@ -24,11 +23,6 @@ server.config.update(SECRET_KEY=SECRET_KEY)
 # Login manager object will be used to login / logout users
 login_manager = LoginManager()
 login_manager.init_app(server)
-
-
-class User(UserMixin):
-    def __init__(self, username):
-        self.id = username
 
 
 @login_manager.user_loader
@@ -50,7 +44,7 @@ app.layout = html.Div(
 )
 
 
-@app.callback(
+@callback(
     Output("user-status-header", "children"),
     Input("url", "pathname"),
 )
@@ -60,26 +54,8 @@ def update_authentication_status(pathname):
     return dcc.Link("login", href="/login")
 
 
-@app.callback(
-    Output("output-state", "children"),
-    Input("login-button", "n_clicks"),
-    State("uname-box", "value"),
-    State("pwd-box", "value"),
-)
-def login_button_click(n_clicks, username, password):
-    if n_clicks > 0:
-        try:
-            response = requests.post(
-                "http://127.0.0.1:1000/auth/login",
-                data={"username": username, "password": password},
-            )
-            if response.status_code == 200:
-                session["access_token"] = response.json()["access_token"]
-                login_user(User(username))
-                return "Login Successful"
-            return "Login Failed"
-        except Exception as e:
-            return str(e)
+def start():
+    app.run_server(debug=True, port=3000)
 
 
 if __name__ == "__main__":

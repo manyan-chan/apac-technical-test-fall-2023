@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.exc import DatabaseError, OperationalError
 
 from apac_coe_technical_test_fall_2023.api.pagination import Pagination, paginate
@@ -77,7 +77,9 @@ class GetOrderQueryParams:
 class GetOrderResponseModel(BaseModel):
     status: int
     data: list[dict] | str
-    timestamp: str = dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp: str = Field(
+        default_factory=lambda: dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    )
     pagination: Optional[Pagination] = None
 
 

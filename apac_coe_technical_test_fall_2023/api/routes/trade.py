@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, status, Query
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.exc import DatabaseError, OperationalError
 
 from apac_coe_technical_test_fall_2023.api.pagination import Pagination, paginate
@@ -57,7 +57,7 @@ class GetTradeQueryParams:
         self.sedol = sedol
         self.page = page
         self.limit = limit
-        
+
     def validate_date(self):
         if self.date:
             try:
@@ -68,14 +68,14 @@ class GetTradeQueryParams:
     def validate_buySell(self):
         if self.buySell and self.buySell not in ["B", "S"]:
             raise ValueError("Invalid buySell value, should be B or S")
-        
-
 
 
 class GetTradeResponseModel(BaseModel):
     status: int
     data: list[dict] | str
-    timestamp: str = dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp: str = Field(
+        default_factory=lambda: dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    )
     pagination: Optional[Pagination] = None
 
 
