@@ -23,7 +23,8 @@ def layout():
         )
         if response.status_code == 200:
             res = response.json()
-            data: list[dict] = res["data"]
+            orders: list[dict] = res["data"]["orders"]
+            trades: list[dict] = res["data"]["trades"]
             timestamp: str = res["timestamp"]
 
             return html.Div(
@@ -33,22 +34,26 @@ def layout():
                     html.Br(),
                     html.Br(),
                     dcc.Dropdown(
-                        id="dropdown",
+                        id="commission-blotter-dropdown",
                         options=[
                             {"label": "Trader", "value": "Trader"},
                             {"label": "Instrument", "value": "Instrument_Code"},
-                            {"label": "Counterparty", "value": "Counterparty"},
+                            {"label": "Counterparty", "value": "Counterparty_Code"},
                         ],
                         value="Trader",
                         clearable=False,
                     ),
                     html.Br(),
                     dcc.Graph(
-                        id="commission-graph",
+                        id="traded-commission-graph",
                     ),
                     html.Br(),
+                    dcc.Graph(
+                        id="expected-commission-graph",
+                    ),
                     html.Div(children=timestamp),
-                    dcc.Store(id="intermediate-value", data=json.dumps(data)),
+                    dcc.Store(id="traded-commission-data", data=json.dumps(trades)),
+                    dcc.Store(id="expected-commission-data", data=json.dumps(orders)),
                 ]
             )
         if response.status_code == 401:
@@ -86,12 +91,23 @@ def redirect_after_logout(unauthorized_message):
 
 
 @callback(
-    Output("commission-graph", "figure"),
-    Input("dropdown", "value"),
-    State("intermediate-value", "data"),
+    Output("traded-commission-graph", "figure"),
+    Output("expected-commission-graph", "figure"),
+    Input("commission-blotter-dropdown", "value"),
+    State("traded-commission-data", "data"),
+    State("expected-commission-data", "data"),
 )
-def update_graph(dropdown: str, data: str):
-    df = pd.DataFrame(json.loads(data))
-    df["Commission"] = df["Commission"].astype(float)
-    fig = px.bar(df, x=dropdown, y="Commission", title="Traded Commissions")
-    return fig
+def update_graph(dropdown: str, trades: str, orders: str):
+    df_trades = pd.DataFrame(json.loads(trades))
+    df_trades["Commission"] = df_trades["Commission"].astype(float)
+
+    df_orders = pd.DataFrame(json.loads(orders))
+    df_orders["Commission"] = df_orders["Commission"].astype(float)
+
+    fig_traded = px.bar(
+        df_trades, x=dropdown, y="Commission", title="Traded Commissions"
+    )
+    fig_expected = px.bar(
+        df_orders, x=dropdown, y="Commission", title="Expected Commissions"
+    )
+    return fig_traded, fig_expected

@@ -1,6 +1,7 @@
 import datetime as dt
 from decimal import Decimal
 
+import pandas as pd
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -8,7 +9,7 @@ from sqlalchemy.exc import DatabaseError, OperationalError
 
 from apac_coe_technical_test_fall_2023.database.connection import Session
 from apac_coe_technical_test_fall_2023.jwt.auth import oauth2_scheme, verify_token
-from apac_coe_technical_test_fall_2023.model.mysql import Trades
+from apac_coe_technical_test_fall_2023.model.mysql import Orders, Trades
 
 router = APIRouter()
 session = Session()
@@ -16,13 +17,13 @@ session = Session()
 
 class GetCommissionResponseModel(BaseModel):
     status: int
-    data: list[dict] | str
+    data: dict | str
     timestamp: str = Field(
         default_factory=lambda: dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     )
 
 
-def get_commission(trade: dict):
+def get_traded_commission(trade: dict):
     if trade["Commission_Type"] == "FIXED_AMOUNT":
         return trade["Commission_Value"]
     elif trade["Commission_Type"] == "bps":
@@ -33,7 +34,21 @@ def get_commission(trade: dict):
         )
         return str(value)
     else:
-        return 0
+        return "0"
+
+
+def get_expected_commission(order: pd.Series):
+    if order["Commission_Type"] == "FIXED_AMOUNT":
+        return order["Commission_Value"]
+    elif order["Commission_Type"] == "bps":
+        value = (
+            Decimal(order["Commission_Value"])
+            * Decimal(order["Quantity_Available"])
+            * Decimal(order["Limit_Price"])
+            / 10000
+        )
+        return str(abs(value))
+    return "0"
 
 
 @router.get("/getCommission")
@@ -50,27 +65,34 @@ def get_trade(
                 ).model_dump(),
             )
 
-        # Create the query
-        query = session.query(Trades)
-        results = query.all()
+        trades = session.query(Trades).all()
+        orders = session.query(Orders).all()
 
-        if not results:
+        if not trades or not orders:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
                 content=GetCommissionResponseModel(
-                    status=status.HTTP_404_NOT_FOUND, data=[]
+                    status=status.HTTP_404_NOT_FOUND, data={}
                 ).model_dump(),
             )
 
-        trades = [trade.to_dict() for trade in results]
+        orders = [order.to_dict() for order in orders]
+        df_order = pd.DataFrame(orders)
+        df_order = df_order.drop_duplicates(subset=["Order_Id"], keep="last")
+
+        # I guess 'C' means cancelled, and 'I' means in progress
+        df_order = df_order[df_order.Order_State == "I"]
+        df_order["Commission"] = df_order.apply(get_expected_commission, axis=1)
+
+        trades = [trade.to_dict() for trade in trades]
         for trade in trades:
-            trade["Commission"] = get_commission(trade)
+            trade["Commission"] = get_traded_commission(trade)
 
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=GetCommissionResponseModel(
                 status=status.HTTP_200_OK,
-                data=trades,
+                data={"trades": trades, "orders": df_order.to_dict(orient="records")},
             ).model_dump(),
         )
 
