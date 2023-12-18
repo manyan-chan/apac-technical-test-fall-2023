@@ -21,9 +21,13 @@ This is my attempt for APAC COE Technical Test (Full-Stack).
 
 - httpx: HTTPX is a fully featured HTTP client for Python 3, which provides sync and async APIs, and support for both HTTP/1.1 and HTTP/2.
 
-- python-multipart: python-multipart is a Python library for parsing multipart/form-data requests, which are commonly used for file uploads.
+- python-multipart: python-multipart is a Python library for parsing multipart/form-data requests. This package does not have 3k stars but it is a requirement for fastapi form-data
 
-- flask-login: Flask-Login is a Flask extension that provides user session management, login, and authentication functionality.
+- flask-login: Flask-Login is a Flask extension that provides user session manag
+
+- pytest: Pytest is a testing framework for Python that allows you to write simple and scalable tests.
+
+- ruff: An extremely fast Python linter and code formatter, written in Rust.
 
 ## Getting Start Guides
 To start the application, you can follow these steps:
