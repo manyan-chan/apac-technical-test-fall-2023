@@ -2,7 +2,7 @@ from time import sleep
 
 import dash
 import requests
-from dash import Input, Output, State, callback, dash_table, dcc, html
+from dash import Input, Output, callback, dash_table, dcc, html
 from flask import session
 from flask_login import current_user, logout_user
 
@@ -81,10 +81,9 @@ def redirect_after_logout(unauthorized_message):
     Output("trade-blotter-table", "data"),
     Output("trade-blotter-timestamp", "children"),
     Input("trade-blotter-table", "page_current"),
-    State("trade-blotter-table", "page_count"),
     prevent_initial_call=True,
 )
-def update_table(page_current: int, page_count: int):
+def update_table(page_current: int):
     response = requests.get(
         "http://127.0.0.1:5000/api/getTrade",
         headers={"Authorization": f"Bearer {session['access_token']}"},

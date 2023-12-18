@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from apac_coe_technical_test_fall_2023.api.routes.comission import (
+from apac_coe_technical_test_fall_2023.api.routes.commission import (
     router as comission_router,
 )
 from apac_coe_technical_test_fall_2023.api.routes.login import router as login_router
