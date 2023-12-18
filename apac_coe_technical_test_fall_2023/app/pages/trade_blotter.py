@@ -15,7 +15,7 @@ def layout():
 
     try:
         response = requests.get(
-            "http://127.0.0.1:5000/api/getOrder",
+            "http://127.0.0.1:5000/api/getTrade",
             headers={"Authorization": f"Bearer {session['access_token']}"},
         )
         if response.status_code == 200:
@@ -27,7 +27,7 @@ def layout():
 
             return html.Div(
                 [
-                    html.H1("Order blotter"),
+                    html.H1("Trade blotter"),
                     dcc.Link("Go back to home", href="/"),
                     html.Br(),
                     html.Br(),
@@ -37,28 +37,28 @@ def layout():
                         page_action="custom",
                         page_current=pagination["currentPage"] - 1,
                         page_count=pagination["totalPages"],
-                        id="order-blotter-table",
+                        id="trade-blotter-table",
                     ),
                     html.Br(),
-                    html.Div(children=timestamp, id="order-blotter-timestamp"),
+                    html.Div(children=timestamp, id="trade-blotter-timestamp"),
                 ]
             )
         if response.status_code == 401:
             logout_user()
             return html.Div(
                 [
-                    html.H1("Order blotter"),
+                    html.H1("Trade blotter"),
                     dcc.Link("Go back to home", href="/"),
                     html.Br(),
                     html.Div(
                         children="Unauthorized, please login again.",
-                        id="order-blotter-unauth",
+                        id="trade-blotter-unauth",
                     ),
                 ]
             )
         return html.Div(
             [
-                html.H1("Order blotter"),
+                html.H1("Trade blotter"),
                 dcc.Link("Go back to home", href="/"),
             ]
         )
@@ -68,7 +68,7 @@ def layout():
 
 @callback(
     Output("url", "pathname", allow_duplicate=True),
-    Input("order-blotter-unauth", "children"),
+    Input("trade-blotter-unauth", "children"),
     prevent_initial_call=True,
 )
 def redirect_after_logout(unauthorized_message):
@@ -78,15 +78,15 @@ def redirect_after_logout(unauthorized_message):
 
 
 @callback(
-    Output("order-blotter-table", "data"),
-    Output("order-blotter-timestamp", "children"),
-    Input("order-blotter-table", "page_current"),
-    State("order-blotter-table", "page_count"),
+    Output("trade-blotter-table", "data"),
+    Output("trade-blotter-timestamp", "children"),
+    Input("trade-blotter-table", "page_current"),
+    State("trade-blotter-table", "page_count"),
     prevent_initial_call=True,
 )
 def update_table(page_current: int, page_count: int):
     response = requests.get(
-        "http://127.0.0.1:5000/api/getOrder",
+        "http://127.0.0.1:5000/api/getTrade",
         headers={"Authorization": f"Bearer {session['access_token']}"},
         params={"page": page_current + 1},
     )

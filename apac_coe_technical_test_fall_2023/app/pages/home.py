@@ -8,5 +8,6 @@ layout = html.Div(
     [
         dcc.Link("Go to Order Blotter", href="/order-blotter"),
         html.Br(),
+        dcc.Link("Go to Trade Blotter", href="/trade-blotter"),
     ]
 )

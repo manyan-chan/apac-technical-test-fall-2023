@@ -1,7 +1,7 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from apac_coe_technical_test_fall_2023.api.routes.comission import (
     router as comission_router,
@@ -25,6 +25,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=500,
         content={"message": "Internal Server Error"},
     )
+
+
+@app.get("/")
+async def main():
+    # Redirect to /docs (relative URL)
+    return RedirectResponse(url="/docs", status_code=status.HTTP_302_FOUND)
 
 
 def start():
