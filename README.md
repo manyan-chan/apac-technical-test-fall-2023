@@ -1,5 +1,5 @@
-# apac-coe-technical-test-fall-2023
-This is my attempt for APAC COE Technical Test (Full-Stack).
+# apac-technical-test-fall-2023
+This is my attempt for APAC Technical Test (Full-Stack).
 
 ## Package used
 
@@ -39,12 +39,3 @@ To start the application, you can follow these steps:
 1. Run the scripts: You can now use the Poetry CLI to run your scripts. For example, to start the API, you can run poetry run api. Similarly, you can run poetry run app to start the app.
 
 1. Login to the app: `username:admin, password: secret`
-
-## Comments on task (optional)
-Great job on designing an interview task that is both fun and practical. It's refreshing to have a coding challenge that goes beyond the traditional LeetCode style and actually tests the candidate's ability to handle real-world scenarios.
-
-I really appreciate how comprehensive the task is in terms of testing the candidate's technical skills across both frontend and backend development. It provides a great opportunity to showcase their abilities in different areas.
-
-However, I have a slight concern about the length of the task. It can be quite challenging for applicants to balance code quality, unit test completeness, and UI/UX considerations while building ORM for database, creating multiple API endpoints with business logic plus an interactive dashboard with login functionality. Perhaps finding a way to streamline or break down the task into smaller components could help alleviate this difficulty.
-
-Overall, the interview task is impressive and engaging, but considering the requirements, it might be worth extending the time allowed or reduce some complexities to make it more manageable for candidates.
